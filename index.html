@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ALM - Audio Language Model</title>
+  <style>
+    :root {
+      color-scheme: light;
+
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+
+      --accent: #16a34a;
+      --accent-hover: #15803d;
+      --focus: rgba(22, 163, 74, 0.35);
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .card {
+      width: min(720px, calc(100vw - 32px));
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 16px 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:focus {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    button:hover {
+      border-color: #9ca3af;
+    }
+
+    @media (min-width: 560px) {
+      .actions {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    dialog {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0;
+      width: min(520px, calc(100vw - 32px));
+    }
+
+    dialog::backdrop {
+      background: rgba(17, 24, 39, 0.45);
+    }
+
+    .dialog-body {
+      padding: 18px;
+    }
+
+    .dialog-title {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .captcha-box {
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+
+    .captcha-code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    .secondary {
+      background: #ffffff;
+    }
+
+    .primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .primary:hover {
+      border-color: var(--accent-hover);
+      background: var(--accent-hover);
+    }
+
+    .hint {
+      margin: 8px 0 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .status {
+      margin: 12px 0 0 0;
+      font-size: 14px;
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>ALM - Audio Language Model</h1>
+    <section class="actions" aria-label="Actions">
+      <button id="trainBtn" type="button">Train Audio Model</button>
+      <button id="analyzeBtn" type="button">Analyze Audio</button>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"></p>
+  </main>
+
+  <dialog id="captchaDialog" aria-labelledby="captchaTitle">
+    <form id="captchaForm" method="dialog">
+      <div class="dialog-body">
+        <h2 id="captchaTitle" class="dialog-title">Login required</h2>
+        <div>Enter the captcha to continue training.</div>
+
+        <div class="captcha-box" aria-label="Captcha">
+          <div class="captcha-code" id="captchaCode">-----</div>
+          <button id="refreshCaptcha" type="button" class="secondary">Refresh</button>
+        </div>
+
+        <div class="row">
+          <label for="captchaInput">Captcha</label>
+          <input id="captchaInput" name="captcha" type="text" autocomplete="off" inputmode="latin" />
+          <p class="hint">Captcha is case-insensitive.</p>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button id="cancelCaptcha" type="button" class="secondary">Cancel</button>
+        <button id="verifyCaptcha" type="submit" class="primary">Verify</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const trainBtn = document.getElementById('trainBtn');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const statusEl = document.getElementById('status');
+
+    const captchaDialog = document.getElementById('captchaDialog');
+    const captchaForm = document.getElementById('captchaForm');
+    const captchaCodeEl = document.getElementById('captchaCode');
+    const captchaInput = document.getElementById('captchaInput');
+    const refreshCaptcha = document.getElementById('refreshCaptcha');
+    const cancelCaptcha = document.getElementById('cancelCaptcha');
+
+    let expectedCaptcha = '';
+
+    function generateCaptcha(length = 6) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let out = '';
+      for (let i = 0; i < length; i += 1) {
+        out += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return out;
+    }
+
+    function openCaptchaDialog() {
+      expectedCaptcha = generateCaptcha();
+      captchaCodeEl.textContent = expectedCaptcha;
+      captchaInput.value = '';
+      if (typeof captchaDialog.showModal === 'function') {
+        captchaDialog.showModal();
+      } else {
+        // Fallback for very old browsers
+        const answer = window.prompt(`Enter captcha to login: ${expectedCaptcha}`);
+        verifyCaptcha(answer);
+      }
+      setTimeout(() => captchaInput.focus(), 0);
+    }
+
+    function verifyCaptcha(value) {
+      const normalized = (value ?? '').toString().trim().toUpperCase();
+      if (!normalized) {
+        statusEl.textContent = 'Captcha is required to login.';
+        return false;
+      }
+      if (normalized !== expectedCaptcha.toUpperCase()) {
+        statusEl.textContent = 'Captcha incorrect. Please try again.';
+        return false;
+      }
+      statusEl.textContent = 'Login successful. You can now train the model.';
+      return true;
+    }
+
+    trainBtn.addEventListener('click', () => {
+      statusEl.textContent = '';
+      openCaptchaDialog();
+    });
+
+    analyzeBtn.addEventListener('click', () => {
+      window.location.href = 'analyze.html';
+    });
+
+    refreshCaptcha.addEventListener('click', () => {
+      expectedCaptcha = generateCaptcha();
+      captchaCodeEl.textContent = expectedCaptcha;
+      captchaInput.value = '';
+      captchaInput.focus();
+    });
+
+    cancelCaptcha.addEventListener('click', () => {
+      captchaDialog.close('cancel');
+      statusEl.textContent = 'Training cancelled.';
+    });
+
+    captchaForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const ok = verifyCaptcha(captchaInput.value);
+      if (ok) {
+        sessionStorage.setItem('alm_logged_in', 'true');
+        captchaDialog.close('ok');
+        window.location.href = 'train.html';
+      } else {
+        // rotate captcha after a failed attempt
+        expectedCaptcha = generateCaptcha();
+        captchaCodeEl.textContent = expectedCaptcha;
+        captchaInput.value = '';
+        captchaInput.focus();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Train Audio Model</title>
+  <style>
+    :root {
+      color-scheme: light;
+
+      --bg: #f6f7fb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+
+      --accent: #16a34a;
+      --accent-hover: #15803d;
+      --focus: rgba(22, 163, 74, 0.35);
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .card {
+      width: min(900px, calc(100vw - 32px));
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 14px;
+      border: 1px solid rgba(22, 163, 74, 0.25);
+      background: rgba(22, 163, 74, 0.08);
+      color: var(--accent-hover);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Train Audio Model</h1>
+    <p>This page opens after captcha login. Hook your training UI/workflow here.</p>
+    <div class="badge" id="loginBadge" aria-live="polite">Checking login…</div>
+  </main>
+
+  <script>
+    // Minimal client-side gate: redirects back if not logged in.
+    const loggedIn = sessionStorage.getItem('alm_logged_in') === 'true';
+    const badge = document.getElementById('loginBadge');
+
+    if (!loggedIn) {
+      window.location.replace('index.html');
+    } else {
+      badge.textContent = 'Logged in ✓';
+    }
+  </script>
+</body>
+</html>
