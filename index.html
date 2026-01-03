@@ -77,17 +77,6 @@
       transition: transform 120ms ease;
     }
 
-    #matrix {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.28;
-      mix-blend-mode: screen;
-    }
-
     .stack {
       position: relative;
       z-index: 1;
@@ -130,9 +119,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      #matrix {
-        display: none;
-      }
       .card {
         transition: none;
         transform: none;
@@ -148,6 +134,13 @@
       font-weight: 700;
       letter-spacing: -0.01em;
       text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: -8px 0 14px 0;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--muted);
     }
 
     .actions {
@@ -331,11 +324,11 @@
   </style>
 </head>
 <body>
-  <canvas id="matrix" aria-hidden="true"></canvas>
   <div class="stack">
     <div class="brand">HearNet</div>
     <main class="card">
       <h1>ALM - Audio Language Model</h1>
+      <p class="subtitle">A quiet space to train and analyze audio.</p>
       <section class="actions" aria-label="Actions">
         <button id="trainBtn" type="button" class="primary">Train Audio Model</button>
         <button id="analyzeBtn" type="button" class="secondary">Analyze Audio</button>
@@ -427,91 +420,6 @@
           if (!card) return;
           card.style.setProperty('--tiltX', '0deg');
           card.style.setProperty('--tiltY', '0deg');
-        });
-      }
-    }
-
-    // Matrix / code rain background (home page only)
-    {
-      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
-      const canvas = document.getElementById('matrix');
-      if (!reduceMotion && canvas && canvas.getContext) {
-        const ctx = canvas.getContext('2d', { alpha: true });
-
-        const glyphs = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&@';
-        let fontSize = 16;
-        let drops = [];
-        let mouseX = -1;
-        let mouseY = -1;
-        let rafId = 0;
-
-        function resize() {
-          const dpr = window.devicePixelRatio || 1;
-          canvas.width = Math.floor(window.innerWidth * dpr);
-          canvas.height = Math.floor(window.innerHeight * dpr);
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.scale(dpr, dpr);
-
-          const cssW = window.innerWidth;
-          const cssH = window.innerHeight;
-          fontSize = Math.max(14, Math.min(18, Math.floor(cssW / 90)));
-          const columns = Math.max(12, Math.floor(cssW / fontSize));
-          drops = Array.from({ length: columns }, () => Math.random() * (cssH / fontSize));
-        }
-
-        function randChar() {
-          return glyphs[Math.floor(Math.random() * glyphs.length)];
-        }
-
-        function tick() {
-          const cssW = window.innerWidth;
-          const cssH = window.innerHeight;
-
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
-          ctx.fillRect(0, 0, cssW, cssH);
-          ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
-
-          for (let i = 0; i < drops.length; i += 1) {
-            const x = i * fontSize;
-            const y = drops[i] * fontSize;
-
-            let alpha = 0.55;
-            if (mouseX >= 0 && mouseY >= 0) {
-              const dx = x - mouseX;
-              const dy = y - mouseY;
-              const d2 = dx * dx + dy * dy;
-              if (d2 < 140 * 140) alpha = 0.95;
-              else if (d2 < 260 * 260) alpha = 0.75;
-            }
-
-            ctx.fillStyle = `rgba(0, 255, 154, ${alpha})`;
-            ctx.fillText(randChar(), x, y);
-
-            if (y > cssH && Math.random() > 0.975) {
-              drops[i] = 0;
-            }
-            drops[i] += 1;
-          }
-
-          rafId = requestAnimationFrame(tick);
-        }
-
-        function onPointerMove(e) {
-          mouseX = e.clientX;
-          mouseY = e.clientY;
-        }
-
-        resize();
-        window.addEventListener('resize', resize);
-        window.addEventListener('pointermove', onPointerMove, { passive: true });
-        rafId = requestAnimationFrame(tick);
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
-            cancelAnimationFrame(rafId);
-          } else {
-            rafId = requestAnimationFrame(tick);
-          }
         });
       }
     }
