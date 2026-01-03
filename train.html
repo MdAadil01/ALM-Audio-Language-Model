@@ -6,36 +6,84 @@
   <title>Train Audio Model</title>
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
 
-      --bg: #f6f7fb;
-      --surface: #ffffff;
-      --border: #e5e7eb;
-      --text: #111827;
-      --muted: #6b7280;
+      --bg: #050807;
+      --surface: rgba(7, 16, 14, 0.92);
+      --surface-solid: #07100e;
+      --border: rgba(16, 185, 129, 0.35);
+      --text: #d1fae5;
+      --muted: rgba(209, 250, 229, 0.70);
 
-      --accent: #16a34a;
-      --accent-hover: #15803d;
-      --focus: rgba(22, 163, 74, 0.35);
+      --accent: #00ff9a;
+      --accent-hover: #00e689;
+      --focus: rgba(0, 255, 154, 0.28);
+
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
     }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: var(--bg);
+      background:
+        radial-gradient(900px 520px at 25% 10%, rgba(0, 255, 154, 0.18), transparent 60%),
+        radial-gradient(700px 460px at 85% 25%, rgba(0, 255, 154, 0.09), transparent 55%),
+        linear-gradient(to bottom, #030605, var(--bg));
       color: var(--text);
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(0, 255, 154, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 255, 154, 0.06) 1px, transparent 1px),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.00) 0px,
+          rgba(0, 0, 0, 0.00) 2px,
+          rgba(0, 0, 0, 0.18) 3px
+        );
+      background-size: 54px 54px, 54px 54px, 100% 4px;
+      opacity: 0.55;
+    }
+
     .card {
+      position: relative;
       width: min(900px, calc(100vw - 32px));
-      background: var(--surface);
+      background: linear-gradient(180deg, rgba(7, 16, 14, 0.92), rgba(7, 16, 14, 0.86));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
       box-sizing: border-box;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(0, 255, 154, 0.55), rgba(0, 255, 154, 0.0) 55%, rgba(0, 0, 0, 0.0));
+      pointer-events: none;
+      opacity: 0.22;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      pointer-events: none;
+      background: radial-gradient(520px 220px at 30% 0%, rgba(0, 255, 154, 0.12), transparent 65%);
+      opacity: 0.8;
+      mix-blend-mode: screen;
     }
 
     h1 {
@@ -43,6 +91,16 @@
       font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.01em;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(209, 250, 229, 0.72);
     }
 
     p {
@@ -51,35 +109,146 @@
       line-height: 1.5;
     }
 
+    .row {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      max-width: 520px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(209, 250, 229, 0.85);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 12px;
+      border: 1px solid rgba(0, 255, 154, 0.30);
+      border-radius: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+    }
+
+    button {
+      border: 1px solid rgba(0, 255, 154, 0.25);
+      background: rgba(3, 8, 7, 0.45);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
+      width: fit-content;
+    }
+
+    button:hover {
+      border-color: rgba(0, 255, 154, 0.55);
+      transform: translateY(-1px);
+    }
+
+    button:focus {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .primary {
+      border-color: rgba(0, 255, 154, 0.85);
+      background: linear-gradient(180deg, rgba(0, 255, 154, 0.22), rgba(0, 255, 154, 0.10));
+    }
+
+    .hint {
+      margin: 8px 0 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
     .badge {
       display: inline-block;
       margin-top: 14px;
-      border: 1px solid rgba(22, 163, 74, 0.25);
-      background: rgba(22, 163, 74, 0.08);
-      color: var(--accent-hover);
+      border: 1px solid rgba(0, 255, 154, 0.30);
+      background: rgba(0, 255, 154, 0.08);
+      color: rgba(209, 250, 229, 0.92);
       padding: 8px 10px;
       border-radius: 999px;
       font-weight: 700;
       font-size: 13px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <h1>Train Audio Model</h1>
-    <p>This page opens after captcha login. Hook your training UI/workflow here.</p>
+    <h1 id="mainTitle">Train Audio Model</h1>
+    <div id="subTitle" class="subtitle hidden">Train Audio Model</div>
+    <p>Complete OTP login to start training.</p>
     <div class="badge" id="loginBadge" aria-live="polite">Checking login…</div>
+
+    <form id="otpForm" class="row hidden">
+      <div id="emailLine" class="hint"></div>
+      <label for="otpInput">OTP</label>
+      <input id="otpInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Enter 6-digit OTP" />
+      <button type="submit" class="primary">Verify OTP</button>
+      <p id="otpHint" class="hint"></p>
+    </form>
   </main>
 
   <script>
-    // Minimal client-side gate: redirects back if not logged in.
-    const loggedIn = sessionStorage.getItem('alm_logged_in') === 'true';
     const badge = document.getElementById('loginBadge');
+    const mainTitle = document.getElementById('mainTitle');
+    const subTitle = document.getElementById('subTitle');
+    const otpForm = document.getElementById('otpForm');
+    const otpInput = document.getElementById('otpInput');
+    const otpHint = document.getElementById('otpHint');
+    const emailLine = document.getElementById('emailLine');
 
-    if (!loggedIn) {
-      window.location.replace('index.html');
-    } else {
+    const loggedIn = sessionStorage.getItem('alm_logged_in') === 'true';
+    const pendingOtp = sessionStorage.getItem('alm_pending_otp') || '';
+    const pendingEmail = sessionStorage.getItem('alm_pending_email') || '';
+
+    function showTrainerVerified() {
+      mainTitle.textContent = 'Trainer Verified';
+      subTitle.classList.remove('hidden');
       badge.textContent = 'Logged in ✓';
+    }
+
+    if (loggedIn) {
+      showTrainerVerified();
+    } else if (pendingOtp && pendingEmail) {
+      badge.textContent = 'OTP required';
+      otpForm.classList.remove('hidden');
+      emailLine.textContent = `Email: ${pendingEmail}`;
+      otpHint.textContent = `Demo OTP: ${pendingOtp}`;
+      setTimeout(() => otpInput.focus(), 0);
+
+      otpForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const entered = (otpInput.value || '').toString().trim();
+        if (!entered) {
+          badge.textContent = 'Enter OTP';
+          return;
+        }
+        if (entered !== pendingOtp) {
+          badge.textContent = 'OTP incorrect';
+          otpInput.value = '';
+          otpInput.focus();
+          return;
+        }
+
+        sessionStorage.setItem('alm_logged_in', 'true');
+        sessionStorage.removeItem('alm_pending_otp');
+        showTrainerVerified();
+        otpForm.classList.add('hidden');
+      });
+    } else {
+      window.location.replace('index.html');
     }
   </script>
 </body>

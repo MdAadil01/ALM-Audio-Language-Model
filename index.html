@@ -6,36 +6,140 @@
   <title>ALM - Audio Language Model</title>
   <style>
     :root {
-      color-scheme: light;
+      color-scheme: dark;
 
-      --bg: #f6f7fb;
-      --surface: #ffffff;
-      --border: #e5e7eb;
-      --text: #111827;
-      --muted: #6b7280;
+      --bg: #050807;
+      --surface: rgba(7, 16, 14, 0.92);
+      --surface-solid: #07100e;
+      --border: rgba(16, 185, 129, 0.35);
+      --text: #d1fae5;
+      --muted: rgba(209, 250, 229, 0.70);
 
-      --accent: #16a34a;
-      --accent-hover: #15803d;
-      --focus: rgba(22, 163, 74, 0.35);
+      --accent: #00ff9a;
+      --accent-hover: #00e689;
+      --focus: rgba(0, 255, 154, 0.28);
+
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      --glow: 0 0 0 4px rgba(0, 255, 154, 0.12);
+
+      /* Cursor-driven effects */
+      --mx: 50%;
+      --my: 40%;
+      --tiltX: 0deg;
+      --tiltY: 0deg;
     }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       min-height: 100vh;
       display: grid;
       place-items: center;
-      background: var(--bg);
+      background:
+        radial-gradient(520px 360px at var(--mx) var(--my), rgba(0, 255, 154, 0.18), transparent 62%),
+        radial-gradient(900px 520px at 25% 10%, rgba(0, 255, 154, 0.14), transparent 60%),
+        radial-gradient(700px 460px at 85% 25%, rgba(0, 255, 154, 0.08), transparent 55%),
+        linear-gradient(to bottom, #030605, var(--bg));
       color: var(--text);
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, rgba(0, 255, 154, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 255, 154, 0.06) 1px, transparent 1px),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.00) 0px,
+          rgba(0, 0, 0, 0.00) 2px,
+          rgba(0, 0, 0, 0.18) 3px
+        );
+      background-size: 54px 54px, 54px 54px, 100% 4px;
+      opacity: 0.55;
+    }
+
     .card {
+      position: relative;
+      z-index: 1;
       width: min(720px, calc(100vw - 32px));
-      background: var(--surface);
+      background: linear-gradient(180deg, rgba(7, 16, 14, 0.92), rgba(7, 16, 14, 0.86));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 28px;
       box-sizing: border-box;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      transform-style: preserve-3d;
+      transform: perspective(900px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
+      transition: transform 120ms ease;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.28;
+      mix-blend-mode: screen;
+    }
+
+    .stack {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+      place-items: center;
+      width: min(720px, calc(100vw - 32px));
+    }
+
+    .brand {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: rgba(209, 250, 229, 0.92);
+      text-shadow:
+        0 0 18px rgba(0, 255, 154, 0.22),
+        0 0 2px rgba(0, 255, 154, 0.20);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(0, 255, 154, 0.55), rgba(0, 255, 154, 0.0) 55%, rgba(0, 0, 0, 0.0));
+      pointer-events: none;
+      opacity: 0.22;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      pointer-events: none;
+      background: radial-gradient(520px 220px at 30% 0%, rgba(0, 255, 154, 0.12), transparent 65%);
+      opacity: 0.8;
+      mix-blend-mode: screen;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #matrix {
+        display: none;
+      }
+      .card {
+        transition: none;
+        transform: none;
+      }
+      body::before {
+        opacity: 0.35;
+      }
     }
 
     h1 {
@@ -43,6 +147,7 @@
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.01em;
+      text-transform: uppercase;
     }
 
     .actions {
@@ -54,14 +159,36 @@
 
     button {
       width: 100%;
-      border: 1px solid #d1d5db;
-      background: var(--surface);
+      border: 1px solid rgba(0, 255, 154, 0.25);
+      background: rgba(3, 8, 7, 0.45);
       color: var(--text);
       border-radius: 12px;
       padding: 14px 16px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
+      transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(0, 255, 154, 0.12) 35%,
+        rgba(0, 255, 154, 0.00) 70%
+      );
+      transform: translateX(-120%);
+      transition: transform 240ms ease;
+      pointer-events: none;
+    }
+
+    button:hover::after {
+      transform: translateX(120%);
     }
 
     button:focus {
@@ -70,7 +197,24 @@
     }
 
     button:hover {
-      border-color: #9ca3af;
+      border-color: rgba(0, 255, 154, 0.55);
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      border-color: rgba(0, 255, 154, 0.85);
+      background: linear-gradient(180deg, rgba(0, 255, 154, 0.22), rgba(0, 255, 154, 0.10));
+      color: var(--text);
+      box-shadow: var(--glow);
+    }
+
+    .primary:hover {
+      border-color: rgba(0, 255, 154, 1);
+      background: linear-gradient(180deg, rgba(0, 255, 154, 0.30), rgba(0, 255, 154, 0.12));
+    }
+
+    .secondary {
+      background: rgba(3, 8, 7, 0.28);
     }
 
     @media (min-width: 560px) {
@@ -84,6 +228,9 @@
       border-radius: 16px;
       padding: 0;
       width: min(520px, calc(100vw - 32px));
+      background: var(--surface-solid);
+      color: var(--text);
+      box-shadow: var(--shadow);
     }
 
     dialog::backdrop {
@@ -107,7 +254,7 @@
       justify-content: space-between;
       gap: 12px;
       border: 1px solid var(--border);
-      background: #f9fafb;
+      background: rgba(0, 255, 154, 0.06);
       border-radius: 12px;
       padding: 12px;
       margin: 12px 0;
@@ -129,16 +276,19 @@
     label {
       font-size: 14px;
       font-weight: 600;
-      color: #374151;
+      color: rgba(209, 250, 229, 0.85);
     }
 
-    input[type="text"] {
+    input[type="text"],
+    input[type="email"] {
       width: 100%;
       padding: 12px 12px;
-      border: 1px solid #d1d5db;
+      border: 1px solid rgba(0, 255, 154, 0.30);
       border-radius: 12px;
       font-size: 16px;
       box-sizing: border-box;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
     }
 
     .dialog-actions {
@@ -147,19 +297,19 @@
       gap: 10px;
       padding: 14px 18px;
       border-top: 1px solid var(--border);
-      background: var(--surface);
+      background: rgba(0, 0, 0, 0.10);
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
     }
 
     .secondary {
-      background: #ffffff;
+      background: rgba(0, 0, 0, 0.25);
     }
 
     .primary {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #ffffff;
+      border-color: rgba(0, 255, 154, 0.85);
+      background: linear-gradient(180deg, rgba(0, 255, 154, 0.22), rgba(0, 255, 154, 0.10));
+      color: var(--text);
     }
 
     .primary:hover {
@@ -176,26 +326,35 @@
     .status {
       margin: 12px 0 0 0;
       font-size: 14px;
-      color: #374151;
+      color: rgba(209, 250, 229, 0.90);
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>ALM - Audio Language Model</h1>
-    <section class="actions" aria-label="Actions">
-      <button id="trainBtn" type="button">Train Audio Model</button>
-      <button id="analyzeBtn" type="button">Analyze Audio</button>
-    </section>
+  <canvas id="matrix" aria-hidden="true"></canvas>
+  <div class="stack">
+    <div class="brand">HearNet</div>
+    <main class="card">
+      <h1>ALM - Audio Language Model</h1>
+      <section class="actions" aria-label="Actions">
+        <button id="trainBtn" type="button" class="primary">Train Audio Model</button>
+        <button id="analyzeBtn" type="button" class="secondary">Analyze Audio</button>
+      </section>
 
-    <p id="status" class="status" aria-live="polite"></p>
-  </main>
+      <p id="status" class="status" aria-live="polite"></p>
+    </main>
+  </div>
 
   <dialog id="captchaDialog" aria-labelledby="captchaTitle">
     <form id="captchaForm" method="dialog">
       <div class="dialog-body">
-        <h2 id="captchaTitle" class="dialog-title">Login required</h2>
-        <div>Enter the captcha to continue training.</div>
+        <h2 id="captchaTitle" class="dialog-title">Login as Trainer</h2>
+        <div id="stepText">Enter your email and captcha to receive an OTP.</div>
+
+        <div class="row">
+          <label for="emailInput">Email</label>
+          <input id="emailInput" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+        </div>
 
         <div class="captcha-box" aria-label="Captcha">
           <div class="captcha-code" id="captchaCode">-----</div>
@@ -211,7 +370,7 @@
 
       <div class="dialog-actions">
         <button id="cancelCaptcha" type="button" class="secondary">Cancel</button>
-        <button id="verifyCaptcha" type="submit" class="primary">Verify</button>
+        <button id="verifyCaptcha" type="submit" class="primary">Send OTP</button>
       </div>
     </form>
   </dialog>
@@ -225,10 +384,137 @@
     const captchaForm = document.getElementById('captchaForm');
     const captchaCodeEl = document.getElementById('captchaCode');
     const captchaInput = document.getElementById('captchaInput');
+    const emailInput = document.getElementById('emailInput');
     const refreshCaptcha = document.getElementById('refreshCaptcha');
     const cancelCaptcha = document.getElementById('cancelCaptcha');
+    const verifyBtn = document.getElementById('verifyCaptcha');
+    const stepText = document.getElementById('stepText');
 
     let expectedCaptcha = '';
+
+    // Cursor-driven visual effects (home page only)
+    {
+      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      if (!reduceMotion) {
+        const root = document.documentElement;
+        const card = document.querySelector('.card');
+        let raf = 0;
+        let lastX = 0;
+        let lastY = 0;
+
+        function setVars() {
+          raf = 0;
+          root.style.setProperty('--mx', `${lastX}px`);
+          root.style.setProperty('--my', `${lastY}px`);
+        }
+
+        window.addEventListener('pointermove', (e) => {
+          lastX = e.clientX;
+          lastY = e.clientY;
+          if (!raf) raf = requestAnimationFrame(setVars);
+
+          if (!card) return;
+          const r = card.getBoundingClientRect();
+          const cx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+          const cy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+          const tiltY = Math.max(-1, Math.min(1, cx)) * 6;
+          const tiltX = Math.max(-1, Math.min(1, -cy)) * 5;
+          card.style.setProperty('--tiltX', `${tiltX.toFixed(2)}deg`);
+          card.style.setProperty('--tiltY', `${tiltY.toFixed(2)}deg`);
+        }, { passive: true });
+
+        window.addEventListener('pointerleave', () => {
+          if (!card) return;
+          card.style.setProperty('--tiltX', '0deg');
+          card.style.setProperty('--tiltY', '0deg');
+        });
+      }
+    }
+
+    // Matrix / code rain background (home page only)
+    {
+      const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      const canvas = document.getElementById('matrix');
+      if (!reduceMotion && canvas && canvas.getContext) {
+        const ctx = canvas.getContext('2d', { alpha: true });
+
+        const glyphs = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%&@';
+        let fontSize = 16;
+        let drops = [];
+        let mouseX = -1;
+        let mouseY = -1;
+        let rafId = 0;
+
+        function resize() {
+          const dpr = window.devicePixelRatio || 1;
+          canvas.width = Math.floor(window.innerWidth * dpr);
+          canvas.height = Math.floor(window.innerHeight * dpr);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.scale(dpr, dpr);
+
+          const cssW = window.innerWidth;
+          const cssH = window.innerHeight;
+          fontSize = Math.max(14, Math.min(18, Math.floor(cssW / 90)));
+          const columns = Math.max(12, Math.floor(cssW / fontSize));
+          drops = Array.from({ length: columns }, () => Math.random() * (cssH / fontSize));
+        }
+
+        function randChar() {
+          return glyphs[Math.floor(Math.random() * glyphs.length)];
+        }
+
+        function tick() {
+          const cssW = window.innerWidth;
+          const cssH = window.innerHeight;
+
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+          ctx.fillRect(0, 0, cssW, cssH);
+          ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`;
+
+          for (let i = 0; i < drops.length; i += 1) {
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+
+            let alpha = 0.55;
+            if (mouseX >= 0 && mouseY >= 0) {
+              const dx = x - mouseX;
+              const dy = y - mouseY;
+              const d2 = dx * dx + dy * dy;
+              if (d2 < 140 * 140) alpha = 0.95;
+              else if (d2 < 260 * 260) alpha = 0.75;
+            }
+
+            ctx.fillStyle = `rgba(0, 255, 154, ${alpha})`;
+            ctx.fillText(randChar(), x, y);
+
+            if (y > cssH && Math.random() > 0.975) {
+              drops[i] = 0;
+            }
+            drops[i] += 1;
+          }
+
+          rafId = requestAnimationFrame(tick);
+        }
+
+        function onPointerMove(e) {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+        }
+
+        resize();
+        window.addEventListener('resize', resize);
+        window.addEventListener('pointermove', onPointerMove, { passive: true });
+        rafId = requestAnimationFrame(tick);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            cancelAnimationFrame(rafId);
+          } else {
+            rafId = requestAnimationFrame(tick);
+          }
+        });
+      }
+    }
 
     function generateCaptcha(length = 6) {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -239,31 +525,57 @@
       return out;
     }
 
+    function generateOtp() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    function isValidEmail(value) {
+      const v = (value ?? '').toString().trim();
+      // Minimal email check (keeps UI simple, avoids over-restricting)
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
     function openCaptchaDialog() {
       expectedCaptcha = generateCaptcha();
       captchaCodeEl.textContent = expectedCaptcha;
       captchaInput.value = '';
+      emailInput.value = '';
+      verifyBtn.textContent = 'Send OTP';
+      stepText.textContent = 'Enter your email and captcha to receive an OTP.';
       if (typeof captchaDialog.showModal === 'function') {
         captchaDialog.showModal();
       } else {
         // Fallback for very old browsers
+        const email = window.prompt('Enter your email:');
         const answer = window.prompt(`Enter captcha to login: ${expectedCaptcha}`);
-        verifyCaptcha(answer);
+        const ok = verifyCaptchaAndEmail(answer, email);
+        if (ok) {
+          window.location.href = 'train.html';
+        }
       }
-      setTimeout(() => captchaInput.focus(), 0);
+      setTimeout(() => emailInput.focus(), 0);
     }
 
-    function verifyCaptcha(value) {
-      const normalized = (value ?? '').toString().trim().toUpperCase();
+    function verifyCaptchaAndEmail(captchaValue, emailValue) {
+      const email = (emailValue ?? '').toString().trim();
+      const normalized = (captchaValue ?? '').toString().trim().toUpperCase();
+      if (!isValidEmail(email)) {
+        stepText.textContent = 'Please enter a valid email.';
+        return false;
+      }
       if (!normalized) {
-        statusEl.textContent = 'Captcha is required to login.';
+        stepText.textContent = 'Captcha is required.';
         return false;
       }
       if (normalized !== expectedCaptcha.toUpperCase()) {
-        statusEl.textContent = 'Captcha incorrect. Please try again.';
+        stepText.textContent = 'Captcha incorrect. Please try again.';
         return false;
       }
-      statusEl.textContent = 'Login successful. You can now train the model.';
+      const otp = generateOtp();
+      sessionStorage.setItem('alm_pending_email', email);
+      sessionStorage.setItem('alm_pending_otp', otp);
+      sessionStorage.setItem('alm_logged_in', 'false');
+      stepText.textContent = 'OTP sent. Continue to training page to login.';
       return true;
     }
 
@@ -290,9 +602,8 @@
 
     captchaForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const ok = verifyCaptcha(captchaInput.value);
+      const ok = verifyCaptchaAndEmail(captchaInput.value, emailInput.value);
       if (ok) {
-        sessionStorage.setItem('alm_logged_in', 'true');
         captchaDialog.close('ok');
         window.location.href = 'train.html';
       } else {
